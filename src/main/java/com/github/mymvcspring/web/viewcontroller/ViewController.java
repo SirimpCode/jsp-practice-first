@@ -1,24 +1,30 @@
 package com.github.mymvcspring.web.viewcontroller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mymvcspring.config.encryption.AES256;
 import com.github.mymvcspring.repository.Image;
+import com.github.mymvcspring.repository.product.Category;
+import com.github.mymvcspring.repository.product.Product;
+import com.github.mymvcspring.repository.product.ProductSpec;
 import com.github.mymvcspring.repository.user.MyUser;
 import com.github.mymvcspring.service.AdminService;
 import com.github.mymvcspring.service.ViewService;
 
+import com.github.mymvcspring.service.product.ProductService;
+import com.github.mymvcspring.web.dto.ProductStatisticsResponse;
+import com.github.mymvcspring.web.dto.StatisticsResponse;
 import com.github.mymvcspring.web.dto.member.MemberListResponse;
 import com.github.mymvcspring.web.dto.member.SearchConditions;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,7 +38,12 @@ public class ViewController {
     private final ClientHttpRequestFactorySettings clientHttpRequestFactorySettings;
     private final AES256 aes256;
     private final AdminService adminService;
+    private final ProductService productService;
 
+    @GetMapping("/shop/storeLocation.up")
+    public String storeLocation(HttpServletRequest request) {
+        return "mall/store_location";
+    }
 
     @GetMapping("/test.do")
     public String test() {
@@ -194,6 +205,84 @@ public class ViewController {
         return "member/admin/member_detail";
 
     }
+
+
+    @GetMapping("/mall/more.up")
+    public String more(HttpServletRequest request) {
+        long hitCount = viewService.getProductCountBySpec(1);
+        request.setAttribute("hitCount", hitCount);
+        return "mall/more";
+    }
+
+    @GetMapping("/mall/scroll.up")
+    public String scroll(HttpServletRequest request) {
+        long hitCount = viewService.getProductCountBySpec(1);
+        request.setAttribute("hitCount", hitCount);
+        return "mall/scroll";
+    }
+
+    @GetMapping("/admin/product.up")
+    public String registerProduct(HttpServletRequest request) {
+        MyUser loginUser = (MyUser) request.getSession().getAttribute("loginUser");
+        if (loginUser == null || !loginUser.getUserId().equals("admin")) {
+            request.setAttribute("message", "관리자만 접근할 수 있습니다.");
+            return "error";
+        }
+        List<Category> categoryList = viewService.getAllCategories();
+        List<ProductSpec> productSpecList = viewService.getAllProductSpecs();
+        request.setAttribute("categoryList", categoryList);
+        request.setAttribute("productSpecList", productSpecList);
+        return "mall/product_register";
+    }
+    @GetMapping("/test.up")
+    public String testPage() {
+        System.out.println(System.getProperty("user.dir"));
+        return "test";
+    }
+    @GetMapping("/product/detail/{productId}/temp")
+    public String productDetailTemp(@PathVariable long productId, HttpServletRequest request){
+        Product product = productService.getProductAndImages(productId);
+        request.setAttribute("product", product);
+        return "mall/product_detail";
+    }
+    @GetMapping("/product/detail/{productId}")
+    public String productDetail(@PathVariable long productId, HttpServletRequest request){
+        Product product = productService.getProductAndImages(productId);
+        request.setAttribute("product", product);
+        return "mall/prod_view";
+    }
+    @GetMapping("/shop/chart")
+    public String viewShopChart(HttpSession session, Model model){
+        if (session.getAttribute("loginUser") == null) {
+            model.addAttribute("message", "로그인이 필요합니다.");
+            return "error";
+        }
+        MyUser loginUser = (MyUser) session.getAttribute("loginUser");
+        model.addAttribute("loginUser", loginUser);
+        List<StatisticsResponse> responses = viewService.obtainingStatistics();
+        List<ProductStatisticsResponse> productStatistics = viewService.obtainingProductStatistics();
+        String jsonResponses = parseJsonToString(responses);
+        String jsonProductStatistics = parseJsonToString(productStatistics);
+        model.addAttribute("statistics", jsonResponses);
+        model.addAttribute("productStatistics", jsonProductStatistics);
+
+        // 차트 페이지를 보여주는 메서드
+        return "mall/shop_chart";
+    }
+    private String parseJsonToString(Object object){
+        //객체를 JSON 문자열로 변환하는 메서드
+        //이 메서드는 Jackson 라이브러리나 Gson 라이브러리를 사용하여 구현할 수 있습니다.
+        //Jackson 라이브러리를 사용하는 예시:
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(object);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("JSON 변환에 실패했습니다.");
+        }
+
+    }
+
 
 
     //강사님 버전

@@ -77,8 +77,12 @@ public class MemberRestController {
     public LoginResponse loginUser(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
         System.out.println(loginRequest.getPassword());
         // 클라이언트의 IP 주소를 얻어오는 것
-        String clientIP = request.getRemoteAddr();
-        System.out.println("Client IP: " + clientIP);//IPv6 주소 Client IP: 0:0:0:0:0:0:0:1 -Djava.net.preferIPv4Stack=true 를 VM 옵션에 추가하면 IPv4 주소로 변경됨
+        String clientIP = request.getHeader("X-Forwarded-For");
+        if (clientIP != null && clientIP.contains(","))
+            clientIP = clientIP.split(",")[0].trim();
+        if (clientIP == null || clientIP.isEmpty())
+            clientIP = request.getRemoteAddr();//이렇게 하면 IPv4 주소를 가져옴
+        System.out.println("Client IP: " + clientIP);;//IPv6 주소 Client IP: 0:0:0:0:0:0:0:1 -Djava.net.preferIPv4Stack=true 를 VM 옵션에 추가하면 IPv4 주소로 변경됨
         LoginResponse loginResponse = memberService.loginLogic(loginRequest, request.getSession(), clientIP);
 
        // if(loginResponse.isSuccess()){

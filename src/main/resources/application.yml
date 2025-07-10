@@ -4,6 +4,10 @@ jasypt:
 jwtpassword:
   source: ENC(foTHOXMs3+XPmFWjU982ZSZl/HmV971ViWri+mqf/+s/EQ8cCb/0uNoIMOnIv52H/BI8X4+EIQojuAeuXCXB/7gzCKMj8Z6dOpR9asKKEOY=)
 spring:
+  servlet:
+    multipart: # 파일 업로드 설정
+      max-file-size: 20MB # 파일 업로드 최대 크기 기본값은 1MB -1로 설정하면 무제한
+      max-request-size: 20MB # 요청당 최대 크기 기본값은 10MB -1로 설정하면 무제한
   server-url:
     base: http://localhost:8080
   mvc:
@@ -41,3 +45,7 @@ springdoc:
   swagger-ui:
     path: /mvc-docs.html
   version: 1.0.0
+
+file:
+  upload:
+    directory: c:/uploads/my-mvc-spring/

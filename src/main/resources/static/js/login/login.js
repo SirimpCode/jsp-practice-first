@@ -158,7 +158,7 @@ loginLogic = (loginId, loginPwd, isRemember) =>{
                 alert(response.message);
                 if(response.changedPassword)
                     alert("비밀번호 변경한지 3개월이 지났습니다. 비밀번호를 변경해 주세요.");
-                // window.location.href = '/index.up';
+                window.location.href = '/index.up';
             } else {
                 alert('로그인 실패: ' + response.message);
             }

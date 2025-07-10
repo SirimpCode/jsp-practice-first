@@ -34,8 +34,8 @@
 
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <%-- jQueryUI CSS 및 JS --%>
-    <link rel="stylesheet" type="text/css" href="<%= ctxPath%>/static/jquery-ui-1.13.1.custom/jquery-ui.min.css"/>
-    <script type="text/javascript" src="<%= ctxPath%>/jquery-ui-1.13.1.custom/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.min.css"/>
+    <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 
@@ -64,6 +64,13 @@
                                            href="<%= ctxPath %>/index.up">Home</a></li>
             <li class="nav-item active"><a class="nav-link menufont_size"
                                            href="<%= ctxPath %>/member/memberRegister.up">회원가입</a></li>
+            <li class="nav-item active"><a class="nav-link menufont_size"
+                                           href="<%= ctxPath %>/mall/more.up">쇼핑몰[더보기]</a>
+            </li>
+
+            <li class="nav-item active"><a class="nav-link menufont_size"
+                                           href="<%= ctxPath %>/mall/mall/scroll.up">쇼핑몰[스크롤]</a>
+            </li>
 
             <c:if test="${not empty sessionScope.loginUser and sessionScope.loginUser.userId == 'admin'}">
                 <li class="nav-item dropdown">

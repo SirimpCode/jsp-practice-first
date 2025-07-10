@@ -2,7 +2,7 @@ if (!userIdParam) {
     alert("사용자 ID가 제공되지 않았습니다.");
     history.back(); // 이전 페이지로 돌아가기
 }
-
+$("div#smsResult").hide()
 function putMemberDetail(responseData){
     const userDetail = responseData.success.responseData;
     const userId = userDetail.userId;
@@ -40,3 +40,41 @@ axios.get(`/api/admin/member/${userIdParam}`)
     .catch(error => {
         console.error("Error fetching member details:", error);
     })
+
+$('button#btnSend').click(()=>{
+    console.log($('input[type="date"]#reservedate').val() + " " + $('input[type="time"]#reservetime').val());
+
+    const date = $('input[type="date"]#reservedate').val();      // 예: 2025-06-17
+    const time = $('input[type="time"]#reservetime').val();      // 예: 09:24
+
+    const today = new Date();//현재시간
+    const pad = n => n.toString().padStart(2, '0');//한자리 숫자일때 0을 앞에 붙임 5 -> 05
+    //오늘 날짜 yyyy-mm-dd 형식으로 월은 0부터 시작하므로 +1 해줘야함
+    const defaultDate = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+
+    const reservedDateTime = `${date || defaultDate}T${time || '00:00'}`;
+
+    const smsContent = $('#smsContent').val();
+    const phoneNumber = $('#phoneNumberInput').text().trim();
+
+    axios.post('/api/message/send', {
+        reservedDateTime: reservedDateTime,
+        message: smsContent,
+        phoneNumber: phoneNumber
+    })
+        .then(response => {
+            console.log(response)
+            $("div#smsResult").html("<span style='color:red; font-weight:bold;'>문자전송이 성공되었습니다.^^</span>");
+            // 성공 처리
+        })
+        .catch(error => {
+            // 에러 처리
+
+            console.error("Error sending SMS:", error);
+            $("div#smsResult").html("<span style='color:red; font-weight:bold;'>문자전송이 실패하였습니다.ㅋㅋ</span>");
+        });
+    $("div#smsResult").show()
+    smsContent.val("")
+
+
+})
